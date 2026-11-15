@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && request.auth.token.role == 'admin';
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*')
+          && request.resource.size <= 5 * 1024 * 1024;
+    }
+
+    function isPdf() {
+      return request.resource.contentType == 'application/pdf'
+          && request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Lost & Found images
+    match /lostFound/{postId}/{fileName} {
+      allow read: if isEmailVerified();
+      allow write: if isEmailVerified() && isImage();
+    }
+
+    // Q&A post images
+    match /qa/{postId}/{fileName} {
+      allow read: if isEmailVerified();
+      allow write: if isEmailVerified() && isImage();
+    }
+
+    // Specific Report images
+    // Only verified students can upload images up to 5MB, and reporter/admin can read
+    match /reports/{reportId}/{fileName} {
+      allow read: if isEmailVerified();
+      allow write: if isEmailVerified() && isImage();
+    }
+
+    // Resource Materials attachments (Images <= 5MB, PDFs <= 10MB)
+    match /resources/{resourceId}/{fileName} {
+      allow read: if isEmailVerified();
+      allow write: if isEmailVerified() && (isImage() || isPdf());
+    }
+
+    // User avatars/profile images
+    match /users/{userId}/{fileName} {
+      allow read: if isEmailVerified();
+      allow write: if isEmailVerified() && request.auth.uid == userId && isImage();
+    }
+  }
+}

@@ -1,0 +1,172 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && request.auth.token.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isEmailVerified() && request.auth.uid == userId;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isEmailVerified();
+      // Allow user to create own doc during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId
+                    && request.resource.data.role == 'student';
+      // User can update only own profile, and cannot modify role or departmentId
+      allow update: if isOwner(userId)
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.departmentId == resource.data.departmentId;
+      // Admin can update or manage users
+      allow write: if isAdmin();
+    }
+
+    // Departments and Rooms
+    match /departments/{departmentId} {
+      allow read: if isEmailVerified();
+      allow write: if isAdmin();
+
+      match /rooms/{roomId} {
+        allow read: if isEmailVerified();
+        allow write: if isAdmin();
+      }
+
+      // Maintenance Contacts: ADMIN-ONLY read and write. Students can NEVER read maintenance numbers.
+      match /maintenanceContacts/{contactId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Lost & Found
+    match /lostFound/{postId} {
+      allow read: if isEmailVerified();
+      allow create: if isEmailVerified()
+                    && request.resource.data.authorUid == request.auth.uid
+                    && request.resource.data.status in ['open', 'resolved'];
+      allow update: if isEmailVerified() && (
+                      (resource.data.authorUid == request.auth.uid) || isAdmin()
+                    );
+      allow delete: if isEmailVerified() && (
+                      (resource.data.authorUid == request.auth.uid) || isAdmin()
+                    );
+    }
+
+    // General Q&A Posts
+    match /qaPosts/{postId} {
+      allow read: if isEmailVerified();
+      // Regular posts created directly by author; anonymous posts created via Cloud Function
+      allow create: if isEmailVerified()
+                    && request.resource.data.isAnonymous == false
+                    && request.resource.data.authorUid == request.auth.uid;
+      // Author or admin can delete/update
+      allow update: if isEmailVerified() && (
+                      (resource.data.authorUid == request.auth.uid) ||
+                      isAdmin() ||
+                      // Allow liking: updating likeCount with valid like subcollection
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount'])
+                    );
+      allow delete: if isEmailVerified() && (
+                      (resource.data.authorUid != null && resource.data.authorUid == request.auth.uid) ||
+                      isAdmin()
+                    );
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if isEmailVerified();
+        allow create: if isEmailVerified()
+                      && request.resource.data.isAnonymous == false
+                      && request.resource.data.authorUid == request.auth.uid;
+        allow update, delete: if isEmailVerified() && (
+                                (resource.data.authorUid == request.auth.uid) || isAdmin()
+                              );
+      }
+
+      // Likes subcollection
+      match /likes/{userId} {
+        allow read: if isEmailVerified();
+        allow create, delete: if isOwner(userId);
+      }
+    }
+
+    // Anonymous Post & Comment Authors: STRICT ADMIN-ONLY READ, NO CLIENT WRITE
+    match /postAuthors/{postId} {
+      allow read: if isAdmin();
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    match /commentAuthors/{commentId} {
+      allow read: if isAdmin();
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Reports collection (Specific Report to maintenance)
+    // Only reporter or admin can read. Client creates with status "submitted".
+    match /reports/{reportId} {
+      allow read: if isEmailVerified() && (
+                    resource.data.reporterUid == request.auth.uid || isAdmin()
+                  );
+      // Direct create allowed if created from client matching reporterUid,
+      // though production creates via createReport Cloud Function for 5/24h rate limiting
+      allow create: if isEmailVerified()
+                    && request.resource.data.reporterUid == request.auth.uid
+                    && request.resource.data.status == 'submitted';
+      // Only admin can update status or notes. Students cannot edit reports once submitted.
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      match /notes/{noteId} {
+        allow read: if isEmailVerified() && (
+                      get(/databases/$(database)/documents/reports/$(reportId)).data.reporterUid == request.auth.uid || isAdmin()
+                    );
+        allow create, write: if isAdmin();
+      }
+    }
+
+    // Resource Materials
+    match /resources/{resourceId} {
+      allow read: if isEmailVerified() && (
+                    resource.data.status == 'approved' ||
+                    resource.data.uploaderUid == request.auth.uid ||
+                    isAdmin()
+                  );
+      allow create: if isEmailVerified()
+                    && request.resource.data.uploaderUid == request.auth.uid;
+      allow update: if isEmailVerified() && (
+                      (resource.data.uploaderUid == request.auth.uid && request.resource.data.status == resource.data.status) ||
+                      isAdmin()
+                    );
+      allow delete: if isEmailVerified() && (
+                      resource.data.uploaderUid == request.auth.uid || isAdmin()
+                    );
+    }
+
+    // Moderation queue
+    match /moderationReports/{reportId} {
+      allow create: if isEmailVerified() && request.resource.data.byUid == request.auth.uid;
+      allow read, write: if isAdmin();
+    }
+
+    // Metadata counters (e.g., report refNo generator)
+    match /metadata/{document=**} {
+      allow read, write: if false; // Server-only
+    }
+  }
+}
