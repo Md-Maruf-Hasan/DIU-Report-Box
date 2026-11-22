@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/constants.dart';
+import 'app/demo_preview.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/services/fcm_service.dart';
@@ -10,22 +11,19 @@ import 'core/services/fcm_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
+  if (!AppConstants.demoPreview) {
     await Firebase.initializeApp();
-    // Enable offline persistence for Firestore
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
-    // Initialize push notifications
     await FcmService.initialize();
-  } catch (e) {
-    debugPrint('[Firebase] Initialization notice: $e');
   }
 
   runApp(
-    const ProviderScope(
-      child: DiuReportBoxApp(),
+    ProviderScope(
+      overrides: AppConstants.demoPreview ? demoPreviewOverrides : const [],
+      child: const DiuReportBoxApp(),
     ),
   );
 }

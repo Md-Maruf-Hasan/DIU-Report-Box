@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/qa_post_model.dart';
@@ -122,7 +122,7 @@ class _QaDetailScreenState extends ConsumerState<QaDetailScreen> {
                       radius: 18,
                       backgroundColor: widget.post.isAnonymous
                           ? Colors.grey.shade400
-                          : Theme.of(context).primaryColor.withOpacity(0.2),
+                          : Theme.of(context).primaryColor.withValues(alpha: 0.2),
                       child: Icon(
                         widget.post.isAnonymous ? Icons.masks_outlined : Icons.person,
                         color: widget.post.isAnonymous
@@ -250,7 +250,7 @@ class _QaDetailScreenState extends ConsumerState<QaDetailScreen> {
                                   radius: 12,
                                   backgroundColor: c.isAnonymous
                                       ? Colors.grey.shade300
-                                      : Theme.of(context).primaryColor.withOpacity(0.15),
+                                      : Theme.of(context).primaryColor.withValues(alpha: 0.15),
                                   child: Icon(
                                     c.isAnonymous ? Icons.masks_outlined : Icons.person_outline,
                                     size: 14,
@@ -309,7 +309,7 @@ class _QaDetailScreenState extends ConsumerState<QaDetailScreen> {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),

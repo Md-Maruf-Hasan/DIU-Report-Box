@@ -1,4 +1,5 @@
 class AppConstants {
+  static const bool demoPreview = bool.fromEnvironment('DEMO_PREVIEW');
   static const String appName = 'DIU Report Box';
   static const String allowedEmailDomain = 'diu.edu.bd';
 

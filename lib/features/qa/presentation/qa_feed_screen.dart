@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../app/constants.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import 'qa_providers.dart';
@@ -103,7 +104,9 @@ class QaFeedScreen extends ConsumerWidget {
                         margin: const EdgeInsets.only(bottom: 12),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () => context.push('/qa/${post.id}', extra: post),
+                          onTap: AppConstants.demoPreview
+                              ? null
+                              : () => context.push('/qa/${post.id}', extra: post),
                           child: Padding(
                             padding: const EdgeInsets.all(14),
                             child: Column(
@@ -116,7 +119,7 @@ class QaFeedScreen extends ConsumerWidget {
                                       radius: 14,
                                       backgroundColor: post.isAnonymous
                                           ? Colors.grey.shade400
-                                          : Theme.of(context).primaryColor.withOpacity(0.2),
+                                          : Theme.of(context).primaryColor.withValues(alpha: 0.2),
                                       child: Icon(
                                         post.isAnonymous
                                             ? Icons.masks_outlined
@@ -222,7 +225,7 @@ class QaFeedScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/qa/create'),
+        onPressed: AppConstants.demoPreview ? null : () => context.push('/qa/create'),
         icon: const Icon(Icons.edit_note),
         label: const Text('Ask / Post'),
       ),

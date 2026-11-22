@@ -92,6 +92,7 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
 
   Future<void> _checkDuplicate() async {
     if (_selectedDeptId != null && _selectedRoomNo != null) {
+      if (AppConstants.demoPreview) return;
       final isDup = await ref.read(reportControllerProvider.notifier).checkSimilar(
             _selectedDeptId!,
             _selectedRoomNo!,
@@ -162,7 +163,9 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(reportControllerProvider);
+    final state = AppConstants.demoPreview
+        ? const AsyncValue<void>.data(null)
+        : ref.watch(reportControllerProvider);
     final isLoading = state.isLoading;
     final departmentsAsync = ref.watch(departmentsProvider);
 
@@ -393,7 +396,7 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: isLoading ? null : _submit,
+              onPressed: isLoading || AppConstants.demoPreview ? null : _submit,
               child: isLoading
                   ? const SizedBox(
                       height: 20,

@@ -99,6 +99,12 @@ flutter pub get
 flutter run
 ```
 
+To preview the main UI without connecting Firebase, run:
+```bash
+flutter run -d chrome --dart-define=DEMO_PREVIEW=true
+```
+This mode uses sample data, skips Firebase initialization, and disables backend actions.
+
 ---
 
 ## Project Structure

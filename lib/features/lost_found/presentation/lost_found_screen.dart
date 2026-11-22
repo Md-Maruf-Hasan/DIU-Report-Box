@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -127,7 +127,9 @@ class LostFoundScreen extends ConsumerWidget {
                         margin: const EdgeInsets.only(bottom: 12),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () => context.push('/lost-found/${item.id}', extra: item),
+                          onTap: AppConstants.demoPreview
+                              ? null
+                              : () => context.push('/lost-found/${item.id}', extra: item),
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Row(
@@ -260,7 +262,8 @@ class LostFoundScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/lost-found/create'),
+        onPressed:
+            AppConstants.demoPreview ? null : () => context.push('/lost-found/create'),
         icon: const Icon(Icons.add),
         label: const Text('Post Item'),
       ),

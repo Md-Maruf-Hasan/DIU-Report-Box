@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/constants.dart';
 import '../../auth/presentation/auth_providers.dart';
 
 class HomeShell extends ConsumerWidget {
@@ -44,11 +45,26 @@ class HomeShell extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.account_circle),
             tooltip: 'My Profile',
-            onPressed: () => context.push('/profile'),
+            onPressed: AppConstants.demoPreview ? null : () => context.push('/profile'),
           ),
         ],
       ),
-      body: navigationShell,
+      body: Column(
+        children: [
+          if (AppConstants.demoPreview)
+            Container(
+              width: double.infinity,
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Demo preview • Sample data only • Backend actions disabled',
+                style: Theme.of(context).textTheme.labelMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          Expanded(child: navigationShell),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onItemTapped,

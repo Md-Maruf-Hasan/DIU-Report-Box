@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../app/constants.dart';
@@ -164,7 +164,7 @@ class _UploadResourceScreenState extends ConsumerState<UploadResourceScreen> {
               children: [
                 // Subsection selector
                 DropdownButtonFormField<String>(
-                  value: _subsection,
+                  initialValue: _subsection,
                   decoration: const InputDecoration(labelText: 'Resource Category'),
                   items: const [
                     DropdownMenuItem(value: 'previous_questions', child: Text('Previous Questions (PDF/Image)')),
@@ -190,7 +190,7 @@ class _UploadResourceScreenState extends ConsumerState<UploadResourceScreen> {
 
                 // Department
                 DropdownButtonFormField<String>(
-                  value: _departmentId,
+                  initialValue: _departmentId,
                   decoration: const InputDecoration(labelText: 'Department'),
                   items: _departments.map((d) {
                     return DropdownMenuItem(

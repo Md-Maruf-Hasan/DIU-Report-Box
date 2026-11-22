@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/constants.dart';
 import '../../../core/models/resource_model.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/loading_skeleton.dart';
@@ -85,10 +86,12 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen>
         children: _subsections.map((sub) => _ResourceListView(subsection: sub)).toList(),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final activeSub = _subsections[_tabController.index];
-          context.push('/resources/upload', extra: activeSub);
-        },
+        onPressed: AppConstants.demoPreview
+            ? null
+            : () {
+                final activeSub = _subsections[_tabController.index];
+                context.push('/resources/upload', extra: activeSub);
+              },
         icon: const Icon(Icons.upload_file),
         label: const Text('Upload'),
       ),
@@ -160,7 +163,9 @@ class _ResourceListView extends ConsumerWidget {
                     ],
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/resources/${item.id}', extra: item),
+                  onTap: AppConstants.demoPreview
+                      ? null
+                      : () => context.push('/resources/${item.id}', extra: item),
                 ),
               );
             },

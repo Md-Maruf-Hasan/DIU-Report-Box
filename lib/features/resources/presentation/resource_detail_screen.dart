@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -138,7 +138,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                 margin: const EdgeInsets.only(bottom: 10),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: _attColor(att.kind).withOpacity(0.15),
+                    backgroundColor: _attColor(att.kind).withValues(alpha: 0.15),
                     child: Icon(_attIcon(att.kind), color: _attColor(att.kind)),
                   ),
                   title: Text(att.name, style: const TextStyle(fontWeight: FontWeight.w600)),

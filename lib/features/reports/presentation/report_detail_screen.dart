@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/report_model.dart';
@@ -51,7 +51,7 @@ class ReportDetailScreen extends ConsumerWidget {
                           Text(
                             _statusDescription(report.status),
                             style: TextStyle(
-                              color: _statusTextColor(report.status).withOpacity(0.9),
+                              color: _statusTextColor(report.status).withValues(alpha: 0.9),
                               fontSize: 12,
                             ),
                           ),

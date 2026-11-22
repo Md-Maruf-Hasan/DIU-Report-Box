@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/models/lost_found_model.dart';
 import '../core/models/qa_post_model.dart';
 import '../core/models/report_model.dart';
 import '../core/models/resource_model.dart';
+import 'constants.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
@@ -32,14 +33,18 @@ final _reportNavKey = GlobalKey<NavigatorState>();
 final _resourceNavKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateChangesProvider);
+  const demoPreview = AppConstants.demoPreview;
+  final authState = demoPreview ? null : ref.watch(authStateChangesProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/lost-found',
     redirect: (context, state) {
-      final user = authState.value;
-      final isAuthLoading = authState.isLoading;
+      if (demoPreview) return null;
+
+      final currentAuthState = authState!;
+      final user = currentAuthState.value;
+      final isAuthLoading = currentAuthState.isLoading;
       final location = state.matchedLocation;
 
       if (isAuthLoading) return null;

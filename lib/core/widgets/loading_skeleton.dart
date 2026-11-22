@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LoadingSkeletonList extends StatelessWidget {
   final int itemCount;
@@ -25,7 +25,7 @@ class LoadingSkeletonList extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           height: itemHeight,
           decoration: BoxDecoration(
-            color: baseColor.withOpacity(0.4),
+            color: baseColor.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
@@ -37,13 +37,13 @@ class LoadingSkeletonList extends StatelessWidget {
                 Container(
                   height: 16,
                   width: double.infinity,
-                  color: baseColor.withOpacity(0.6),
+                  color: baseColor.withValues(alpha: 0.6),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   height: 12,
                   width: 180,
-                  color: baseColor.withOpacity(0.6),
+                  color: baseColor.withValues(alpha: 0.6),
                 ),
               ],
             ),
