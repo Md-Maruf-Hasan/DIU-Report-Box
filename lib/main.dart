@@ -8,21 +8,31 @@ import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/services/fcm_service.dart';
 
+bool _firebaseInitFailed = false;
+
+bool get useDemoMode => AppConstants.demoPreview || _firebaseInitFailed;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!AppConstants.demoPreview) {
-    await Firebase.initializeApp();
-    FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
-    await FcmService.initialize();
+    try {
+      await Firebase.initializeApp();
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      );
+      await FcmService.initialize();
+    } catch (e) {
+      debugPrint('[Firebase] Initialization failed: $e');
+      debugPrint('[Firebase] Falling back to demo preview mode.');
+      _firebaseInitFailed = true;
+    }
   }
 
   runApp(
     ProviderScope(
-      overrides: AppConstants.demoPreview ? demoPreviewOverrides : const [],
+      overrides: useDemoMode ? demoPreviewOverrides : const [],
       child: const DiuReportBoxApp(),
     ),
   );

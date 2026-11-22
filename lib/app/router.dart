@@ -5,7 +5,7 @@ import '../core/models/lost_found_model.dart';
 import '../core/models/qa_post_model.dart';
 import '../core/models/report_model.dart';
 import '../core/models/resource_model.dart';
-import 'constants.dart';
+import '../main.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
@@ -33,7 +33,7 @@ final _reportNavKey = GlobalKey<NavigatorState>();
 final _resourceNavKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  const demoPreview = AppConstants.demoPreview;
+  final demoPreview = useDemoMode;
   final authState = demoPreview ? null : ref.watch(authStateChangesProvider);
 
   return GoRouter(
@@ -180,7 +180,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'upload',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) {
-                      final sub = (state.extra as String?) ?? 'previous_questions';
+                      final sub =
+                          (state.extra as String?) ?? 'previous_questions';
                       return UploadResourceScreen(initialSubsection: sub);
                     },
                   ),

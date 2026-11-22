@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../app/constants.dart';
 import '../../../core/validators.dart';
+import '../../../main.dart';
 import 'my_reports_screen.dart';
 import 'report_providers.dart';
 
@@ -11,7 +12,8 @@ class SpecificReportMainScreen extends StatefulWidget {
   const SpecificReportMainScreen({super.key});
 
   @override
-  State<SpecificReportMainScreen> createState() => _SpecificReportMainScreenState();
+  State<SpecificReportMainScreen> createState() =>
+      _SpecificReportMainScreenState();
 }
 
 class _SpecificReportMainScreenState extends State<SpecificReportMainScreen>
@@ -92,12 +94,13 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
 
   Future<void> _checkDuplicate() async {
     if (_selectedDeptId != null && _selectedRoomNo != null) {
-      if (AppConstants.demoPreview) return;
-      final isDup = await ref.read(reportControllerProvider.notifier).checkSimilar(
-            _selectedDeptId!,
-            _selectedRoomNo!,
-            _selectedCategory,
-          );
+      if (useDemoMode) return;
+      final isDup =
+          await ref.read(reportControllerProvider.notifier).checkSimilar(
+                _selectedDeptId!,
+                _selectedRoomNo!,
+                _selectedCategory,
+              );
       if (mounted) {
         setState(() => _duplicateWarning = isDup);
       }
@@ -112,7 +115,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
       return;
     }
 
-    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final XFile? picked =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (picked != null) {
       final file = File(picked.path);
       final size = await file.length();
@@ -129,21 +133,25 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedDeptId == null || _selectedRoomId == null || _selectedRoomNo == null) {
+    if (_selectedDeptId == null ||
+        _selectedRoomId == null ||
+        _selectedRoomNo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both Department and Room.')),
+        const SnackBar(
+            content: Text('Please select both Department and Room.')),
       );
       return;
     }
 
-    final refNo = await ref.read(reportControllerProvider.notifier).submitReport(
-          departmentId: _selectedDeptId!,
-          roomId: _selectedRoomId!,
-          roomNo: _selectedRoomNo!,
-          category: _selectedCategory,
-          description: _descController.text.trim(),
-          imageFiles: _attachedImages,
-        );
+    final refNo =
+        await ref.read(reportControllerProvider.notifier).submitReport(
+              departmentId: _selectedDeptId!,
+              roomId: _selectedRoomId!,
+              roomNo: _selectedRoomNo!,
+              category: _selectedCategory,
+              description: _descController.text.trim(),
+              imageFiles: _attachedImages,
+            );
 
     if (refNo != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,7 +171,7 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
 
   @override
   Widget build(BuildContext context) {
-    final state = AppConstants.demoPreview
+    final state = useDemoMode
         ? const AsyncValue<void>.data(null)
         : ref.watch(reportControllerProvider);
     final isLoading = state.isLoading;
@@ -191,7 +199,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                   Expanded(
                     child: Text(
                       'Your report will automatically dispatch an SMS alert directly to the department maintenance staff.',
-                      style: TextStyle(color: Colors.green.shade900, fontSize: 13),
+                      style:
+                          TextStyle(color: Colors.green.shade900, fontSize: 13),
                     ),
                   ),
                 ],
@@ -238,7 +247,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                     });
                     _checkDuplicate();
                   },
-                  validator: (val) => val == null ? 'Please select a department' : null,
+                  validator: (val) =>
+                      val == null ? 'Please select a department' : null,
                 );
               },
               loading: () => const LinearProgressIndicator(),
@@ -250,11 +260,13 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
             if (_selectedDeptId != null) ...[
               Consumer(
                 builder: (context, ref, child) {
-                  final roomsAsync = ref.watch(roomsForDepartmentProvider(_selectedDeptId!));
+                  final roomsAsync =
+                      ref.watch(roomsForDepartmentProvider(_selectedDeptId!));
                   return roomsAsync.when(
                     data: (rooms) {
                       if (rooms.isEmpty) {
-                        return const Text('No rooms registered for this department.');
+                        return const Text(
+                            'No rooms registered for this department.');
                       }
                       return DropdownButtonFormField<String>(
                         value: _selectedRoomId,
@@ -265,7 +277,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                         items: rooms.map((room) {
                           return DropdownMenuItem(
                             value: room.id,
-                            child: Text('Room ${room.roomNo} (${room.floor ?? "Academic"})'),
+                            child: Text(
+                                'Room ${room.roomNo} (${room.floor ?? "Academic"})'),
                           );
                         }).toList(),
                         onChanged: (val) {
@@ -276,7 +289,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                           });
                           _checkDuplicate();
                         },
-                        validator: (val) => val == null ? 'Please select a room' : null,
+                        validator: (val) =>
+                            val == null ? 'Please select a room' : null,
                       );
                     },
                     loading: () => const LinearProgressIndicator(),
@@ -322,7 +336,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                     Expanded(
                       child: Text(
                         'A similar report is already active for this room & category. Our team is already looking into it.',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -337,7 +352,8 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
               maxLines: 4,
               decoration: const InputDecoration(
                 labelText: 'Issue Description (min 15 characters)',
-                hintText: 'e.g. PC #4 is not turning on. Monitor power LED is blinking orange.',
+                hintText:
+                    'e.g. PC #4 is not turning on. Monitor power LED is blinking orange.',
               ),
               validator: Validators.validateReportDescription,
             ),
@@ -368,10 +384,12 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
                         top: 0,
                         right: 8,
                         child: GestureDetector(
-                          onTap: () => setState(() => _attachedImages.removeAt(entry.key)),
+                          onTap: () => setState(
+                              () => _attachedImages.removeAt(entry.key)),
                           child: Container(
                             color: Colors.black54,
-                            child: const Icon(Icons.close, color: Colors.white, size: 16),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 16),
                           ),
                         ),
                       ),
@@ -396,14 +414,16 @@ class _SubmitReportFormState extends ConsumerState<SubmitReportForm> {
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: isLoading || AppConstants.demoPreview ? null : _submit,
+              onPressed: isLoading || useDemoMode ? null : _submit,
               child: isLoading
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Submit Report to Maintenance', style: TextStyle(fontSize: 16)),
+                  : const Text('Submit Report to Maintenance',
+                      style: TextStyle(fontSize: 16)),
             ),
           ],
         ),
