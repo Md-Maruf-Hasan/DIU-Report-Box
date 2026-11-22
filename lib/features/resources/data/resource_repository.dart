@@ -1,21 +1,20 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:uuid/uuid.dart';
 import '../../../core/models/resource_model.dart';
+import '../../../core/services/supabase_storage_service.dart';
 
 class ResourceRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
+  final SupabaseStorageService _storage;
   final FirebaseAuth _auth;
 
   ResourceRepository({
     FirebaseFirestore? firestore,
-    FirebaseStorage? storage,
+    SupabaseStorageService? storage,
     FirebaseAuth? auth,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance,
+        _storage = storage ?? SupabaseStorageService(),
         _auth = auth ?? FirebaseAuth.instance;
 
   Stream<List<ResourceModel>> watchResources({
@@ -34,19 +33,23 @@ class ResourceRepository {
       query = query.where('departmentId', isEqualTo: departmentId);
     }
     if (courseCode != null && courseCode.trim().isNotEmpty) {
-      query = query.where('courseCode', isEqualTo: courseCode.trim().toUpperCase());
+      query =
+          query.where('courseCode', isEqualTo: courseCode.trim().toUpperCase());
     }
 
     query = query.orderBy('createdAt', descending: true);
 
     return query.snapshots().map((snapshot) {
-      final list = snapshot.docs.map((doc) => ResourceModel.fromFirestore(doc)).toList();
+      final list =
+          snapshot.docs.map((doc) => ResourceModel.fromFirestore(doc)).toList();
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         final q = searchQuery.trim().toLowerCase();
-        return list.where((r) =>
-            r.title.toLowerCase().contains(q) ||
-            r.courseCode.toLowerCase().contains(q) ||
-            r.courseTitle.toLowerCase().contains(q)).toList();
+        return list
+            .where((r) =>
+                r.title.toLowerCase().contains(q) ||
+                r.courseCode.toLowerCase().contains(q) ||
+                r.courseTitle.toLowerCase().contains(q))
+            .toList();
       }
       return list;
     });
@@ -79,12 +82,12 @@ class ResourceRepository {
     for (int i = 0; i < files.length; i++) {
       final file = files[i];
       final kind = fileKinds[i];
-      final fileName = '${const Uuid().v4()}_${file.path.split(Platform.pathSeparator).last}';
-      final storageRef = _storage.ref().child('resources/$resourceId/$fileName');
-
       final contentType = kind == 'image' ? 'image/jpeg' : 'application/pdf';
-      final task = await storageRef.putFile(file, SettableMetadata(contentType: contentType));
-      final url = await task.ref.getDownloadURL();
+      final url = await _storage.uploadFile(
+        file: file,
+        folder: 'resources/$resourceId',
+        contentType: contentType,
+      );
       final size = await file.length();
 
       attachments.add(ResourceAttachment(

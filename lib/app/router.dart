@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'demo_mode.dart';
 import '../core/models/lost_found_model.dart';
 import '../core/models/qa_post_model.dart';
 import '../core/models/report_model.dart';
@@ -33,7 +34,7 @@ final _reportNavKey = GlobalKey<NavigatorState>();
 final _resourceNavKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final demoPreview = useDemoMode;
+  final demoPreview = ref.watch(demoModeProvider) || useDemoMode;
   final authState = demoPreview ? null : ref.watch(authStateChangesProvider);
 
   return GoRouter(

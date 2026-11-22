@@ -55,10 +55,10 @@ This document records architectural, technical, and implementation decisions mad
 ## 6. Resource Materials Moderation & Attachment Types
 - **Decision**:
   - Config flag `RESOURCE_REQUIRES_APPROVAL` defaults to `false` (immediate availability) but can be set to `true` to require admin approval before appearing in public queries.
-  - Storage path convention:
+  - Supabase Storage path convention:
     - `resources/{resourceId}/{fileName}`
     - Size limits: Image <= 5 MB, PDF <= 10 MB.
-  - Mime types and file extensions are strictly validated before upload and in Storage Security Rules.
+  - Mime types and file extensions are validated before upload.
 
 ---
 

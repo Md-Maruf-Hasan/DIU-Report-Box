@@ -36,7 +36,7 @@ DIU Report Box is a mobile application for university students at Daffodil Inter
 - **Framework**: Flutter (Dart null-safety)
 - **State Management**: Riverpod (`flutter_riverpod`)
 - **Routing**: `go_router`
-- **Backend**: Firebase Auth, Cloud Firestore, Firebase Storage, Cloud Functions (TypeScript)
+- **Backend**: Firebase Auth, Cloud Firestore, Supabase Storage, Cloud Functions (TypeScript)
 - **SMS Gateway**: SSL Wireless / BulkSMSBD / Alpha SMS / Sandbox Mock
 - **Push Notifications**: Firebase Cloud Messaging (FCM)
 
@@ -53,33 +53,42 @@ DIU Report Box is a mobile application for university students at Daffodil Inter
 ### 2. Configure Firebase
 1. Create a Firebase project in the Firebase Console.
 2. Enable **Authentication** (Email/Password).
-3. Enable **Cloud Firestore** and **Firebase Storage**.
+3. Enable **Cloud Firestore**.
 4. Run FlutterFire CLI:
    ```bash
    flutterfire configure --project=<your-firebase-project-id>
    ```
 
-### 3. Running Firebase Local Emulators
-To test the complete stack locally (Firestore, Auth, Functions, Storage):
+### 3. Configure Supabase Storage
+1. Create a Supabase project.
+2. Create a public storage bucket named `app-files`.
+3. Run the app with the following defines:
+   ```bash
+   flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_ANON_KEY=<anon-key>
+   ```
+4. Uploaded files use `lostFound/{postId}`, `qa/{postId}`, `reports/{reportId}`, and `resources/{resourceId}` paths.
+
+### 4. Running Firebase Local Emulators
+To test Firebase services locally (Firestore, Auth, Functions):
 ```bash
 firebase emulators:start
 ```
 The emulator UI will be available at `http://localhost:4000`.
 
-### 4. Install Cloud Functions Dependencies & Build
+### 5. Install Cloud Functions Dependencies & Build
 ```bash
 cd functions
 npm install
 npm run build
 ```
 
-### 5. Run Security Rules Unit Tests
+### 6. Run Security Rules Unit Tests
 ```bash
 cd functions
 npm test
 ```
 
-### 6. Seed Initial Departments, Rooms & Maintenance Contacts
+### 7. Seed Initial Departments, Rooms & Maintenance Contacts
 With the emulators running:
 ```bash
 # Windows PowerShell
@@ -87,13 +96,13 @@ $env:FIRESTORE_EMULATOR_HOST="127.0.0.1:8080"
 node scripts/seed_departments.js
 ```
 
-### 7. Grant Admin Role
+### 8. Grant Admin Role
 To promote a registered university email to an admin:
 ```bash
 node scripts/set_admin_role.js admin@diu.edu.bd admin
 ```
 
-### 8. Run the Flutter App
+### 9. Run the Flutter App
 ```bash
 flutter pub get
 flutter run
@@ -124,6 +133,5 @@ lib/
     admin/        # Moderation, maintenance contacts, SMS retry
 functions/        # TypeScript Cloud Functions
 firestore.rules   # Security rules
-storage.rules     # Storage security rules
 DECISIONS.md      # Architecture log
 ```

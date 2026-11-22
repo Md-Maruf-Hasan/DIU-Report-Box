@@ -2,24 +2,24 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/models/qa_post_model.dart';
+import '../../../core/services/supabase_storage_service.dart';
 
 class QaRepository {
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
-  final FirebaseStorage _storage;
+  final SupabaseStorageService _storage;
   final FirebaseAuth _auth;
 
   QaRepository({
     FirebaseFirestore? firestore,
     FirebaseFunctions? functions,
-    FirebaseStorage? storage,
+    SupabaseStorageService? storage,
     FirebaseAuth? auth,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _functions = functions ?? FirebaseFunctions.instance,
-        _storage = storage ?? FirebaseStorage.instance,
+        _storage = storage ?? SupabaseStorageService(),
         _auth = auth ?? FirebaseAuth.instance;
 
   Stream<List<QaPostModel>> watchFeed({
@@ -35,11 +35,15 @@ class QaRepository {
     }
 
     return query.snapshots().map((snapshot) {
-      final list = snapshot.docs.map((doc) => QaPostModel.fromFirestore(doc)).toList();
+      final list =
+          snapshot.docs.map((doc) => QaPostModel.fromFirestore(doc)).toList();
       if (searchQuery.trim().isNotEmpty) {
         final q = searchQuery.trim().toLowerCase();
-        return list.where((item) =>
-            item.title.toLowerCase().contains(q) || item.body.toLowerCase().contains(q)).toList();
+        return list
+            .where((item) =>
+                item.title.toLowerCase().contains(q) ||
+                item.body.toLowerCase().contains(q))
+            .toList();
       }
       return list;
     });
@@ -56,11 +60,12 @@ class QaRepository {
 
     String? imageUrl;
     if (imageFile != null) {
-      final fileName = '${const Uuid().v4()}.jpg';
       final tempId = const Uuid().v4();
-      final storageRef = _storage.ref().child('qa/$tempId/$fileName');
-      final uploadTask = await storageRef.putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'));
-      imageUrl = await uploadTask.ref.getDownloadURL();
+      imageUrl = await _storage.uploadFile(
+        file: imageFile,
+        folder: 'qa/$tempId',
+        contentType: 'image/jpeg',
+      );
     }
 
     if (isAnonymous) {
@@ -96,7 +101,9 @@ class QaRepository {
         .collection('comments')
         .orderBy('createdAt', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => CommentModel.fromFirestore(doc)).toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CommentModel.fromFirestore(doc))
+            .toList());
   }
 
   Future<void> addComment({
@@ -117,7 +124,11 @@ class QaRepository {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
       final authorName = userDoc.data()?['name'] ?? 'Student';
 
-      final commentRef = _firestore.collection('qaPosts').doc(postId).collection('comments').doc();
+      final commentRef = _firestore
+          .collection('qaPosts')
+          .doc(postId)
+          .collection('comments')
+          .doc();
 
       final batch = _firestore.batch();
       batch.set(commentRef, {
@@ -151,7 +162,11 @@ class QaRepository {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final likeRef = _firestore.collection('qaPosts').doc(postId).collection('likes').doc(user.uid);
+    final likeRef = _firestore
+        .collection('qaPosts')
+        .doc(postId)
+        .collection('likes')
+        .doc(user.uid);
     final postRef = _firestore.collection('qaPosts').doc(postId);
 
     final likeSnap = await likeRef.get();

@@ -1,21 +1,20 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:uuid/uuid.dart';
 import '../../../core/models/lost_found_model.dart';
+import '../../../core/services/supabase_storage_service.dart';
 
 class LostFoundRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
+  final SupabaseStorageService _storage;
   final FirebaseAuth _auth;
 
   LostFoundRepository({
     FirebaseFirestore? firestore,
-    FirebaseStorage? storage,
+    SupabaseStorageService? storage,
     FirebaseAuth? auth,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance,
+        _storage = storage ?? SupabaseStorageService(),
         _auth = auth ?? FirebaseAuth.instance;
 
   Stream<List<LostFoundModel>> watchFeed({
@@ -41,10 +40,16 @@ class LostFoundRepository {
     query = query.orderBy('createdAt', descending: true);
 
     return query.snapshots().map((snapshot) {
-      final list = snapshot.docs.map((doc) => LostFoundModel.fromFirestore(doc)).toList();
+      final list = snapshot.docs
+          .map((doc) => LostFoundModel.fromFirestore(doc))
+          .toList();
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         final q = searchQuery.trim().toLowerCase();
-        return list.where((item) => item.title.toLowerCase().contains(q) || item.description.toLowerCase().contains(q)).toList();
+        return list
+            .where((item) =>
+                item.title.toLowerCase().contains(q) ||
+                item.description.toLowerCase().contains(q))
+            .toList();
       }
       return list;
     });
@@ -69,14 +74,15 @@ class LostFoundRepository {
     final docRef = _firestore.collection('lostFound').doc();
     final postId = docRef.id;
 
-    // Upload up to 3 images to Firebase Storage
+    // Upload up to 3 images to Supabase Storage
     final List<String> imageUrls = [];
     for (int i = 0; i < imageFiles.length && i < 3; i++) {
       final file = imageFiles[i];
-      final fileName = '${const Uuid().v4()}.jpg';
-      final storageRef = _storage.ref().child('lostFound/$postId/$fileName');
-      final uploadTask = await storageRef.putFile(file, SettableMetadata(contentType: 'image/jpeg'));
-      final url = await uploadTask.ref.getDownloadURL();
+      final url = await _storage.uploadFile(
+        file: file,
+        folder: 'lostFound/$postId',
+        contentType: 'image/jpeg',
+      );
       imageUrls.add(url);
     }
 

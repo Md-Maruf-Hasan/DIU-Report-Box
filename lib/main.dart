@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/constants.dart';
 import 'app/demo_preview.dart';
 import 'app/router.dart';
@@ -23,6 +24,18 @@ void main() async {
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
       await FcmService.initialize();
+
+      if (AppConstants.supabaseUrl.isNotEmpty &&
+          AppConstants.supabaseAnonKey.isNotEmpty) {
+        await Supabase.initialize(
+          url: AppConstants.supabaseUrl,
+          anonKey: AppConstants.supabaseAnonKey,
+        );
+      } else {
+        debugPrint(
+          '[Supabase] URL or anon key is missing; file uploads will be unavailable.',
+        );
+      }
     } catch (e) {
       debugPrint('[Firebase] Initialization failed: $e');
       debugPrint('[Firebase] Falling back to demo preview mode.');
