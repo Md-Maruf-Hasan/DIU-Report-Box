@@ -47,19 +47,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
+    final isDemoMode = ref.watch(demoModeProvider);
+    final authState = isDemoMode
+        ? const AsyncValue<void>.data(null)
+        : ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0783C4),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 650;
+          final compact = constraints.maxWidth < 760;
           final cardWidth = compact
               ? constraints.maxWidth - 32
-              : math.min(580.0, constraints.maxWidth - 48);
-          final cardHeight =
-              compact ? math.min(520.0, constraints.maxHeight - 32) : 308.0;
+              : math.min(820.0, constraints.maxWidth - 48);
+          final cardHeight = math.min(
+            compact ? 620.0 : 560.0,
+            math.max(0.0, constraints.maxHeight - 32),
+          );
 
           return Center(
             child: Container(
@@ -67,14 +72,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               height: cardHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.10),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
+                    color: Colors.black.withOpacity(0.16),
+                    blurRadius: 28,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
+              clipBehavior: Clip.antiAlias,
               child: Row(
                 children: [
                   if (!compact) const Expanded(child: _WelcomePanel()),
@@ -86,6 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscurePassword: _obscurePassword,
                       isLoading: isLoading,
                       authState: authState,
+                      compact: compact,
                       onSubmit: _submit,
                       onTogglePassword: () => setState(() {
                         _obscurePassword = !_obscurePassword;
@@ -115,51 +123,39 @@ class _WelcomePanel extends StatelessWidget {
           colors: [Color(0xFF087DB8), Color(0xFF0A98D2)],
         ),
       ),
-      child: ClipRect(
+      child: const ClipRect(
         child: CustomPaint(
           painter: _WelcomePainter(),
           child: Stack(
             children: [
-              const Positioned(
-                left: 0,
-                right: 0,
-                top: 155,
-                child: Column(
-                  children: [
-                    Text(
-                      'Welcome Page',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 23,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.2,
-                      ),
+              Positioned.fill(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Welcome to DIU CAMPUS',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'Sign in to your account',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFFD5F1FF),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Sign in To your Account',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFFD5F1FF),
-                        fontSize: 8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Positioned(
-                left: 0,
-                right: 0,
-                bottom: 30,
-                child: Text(
-                  'WWW.YOURSITE.COM',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 7,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
                   ),
                 ),
               ),
@@ -178,6 +174,7 @@ class _LoginForm extends StatelessWidget {
   final bool obscurePassword;
   final bool isLoading;
   final AsyncValue<void> authState;
+  final bool compact;
   final Future<void> Function() onSubmit;
   final VoidCallback onTogglePassword;
 
@@ -188,6 +185,7 @@ class _LoginForm extends StatelessWidget {
     required this.obscurePassword,
     required this.isLoading,
     required this.authState,
+    required this.compact,
     required this.onSubmit,
     required this.onTogglePassword,
   });
@@ -196,144 +194,158 @@ class _LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFFFFFFF),
-      padding: const EdgeInsets.fromLTRB(30, 50, 30, 24),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 24 : 40,
+        vertical: compact ? 28 : 36,
+      ),
       child: Form(
         key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Hello!',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 9,
-                height: 1,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Hello!',
+                style: TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 16,
+                  height: 1.2,
+                ),
               ),
-            ),
-            const SizedBox(height: 3),
-            const Text(
-              'Good Morning',
-              style: TextStyle(
-                color: Color(0xFF111111),
-                fontSize: 9,
-                height: 1,
+              const SizedBox(height: 4),
+              const Text(
+                'Good morning',
+                style: TextStyle(
+                  color: Color(0xFF111111),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 22),
-            const Text(
-              'Login Your Account',
-              style: TextStyle(
-                color: Color(0xFF077EB9),
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
+              const SizedBox(height: 24),
+              const Text(
+                'Login to your account',
+                style: TextStyle(
+                  color: Color(0xFF077EB9),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _UnderlineField(
-              controller: emailController,
-              hintText: 'Email Address',
-              keyboardType: TextInputType.emailAddress,
-              validator: Validators.validateEmail,
-            ),
-            const SizedBox(height: 6),
-            _UnderlineField(
-              controller: passwordController,
-              hintText: 'Password',
-              obscureText: obscurePassword,
-              validator: (value) =>
-                  value == null || value.isEmpty ? 'Enter your password' : null,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: Checkbox(
-                    value: false,
-                    onChanged: (_) {},
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                    side:
-                        const BorderSide(color: Color(0xFF9B9B9B), width: 0.7),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(1),
-                    ),
+              const SizedBox(height: 24),
+              if (authState.hasError) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Text(
+                    authState.error.toString().replaceAll('Exception: ', ''),
+                    style: TextStyle(color: Colors.red.shade800),
                   ),
                 ),
-                const SizedBox(width: 5),
-                const Text(
-                  'Remember',
-                  style: TextStyle(fontSize: 6.5, color: Color(0xFF777777)),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () => context.push('/forgot-password'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Forget Password?',
-                    style: TextStyle(
-                      fontSize: 6.5,
-                      color: Color(0xFF777777),
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 16),
               ],
-            ),
-            const SizedBox(height: 14),
-            SizedBox(
-              height: 21,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : () => onSubmit(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF05A0B5),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: EdgeInsets.zero,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+              _UnderlineField(
+                controller: emailController,
+                hintText: 'Email Address',
+                keyboardType: TextInputType.emailAddress,
+                validator: Validators.validateEmail,
+              ),
+              const SizedBox(height: 16),
+              _UnderlineField(
+                controller: passwordController,
+                hintText: 'Password',
+                obscureText: obscurePassword,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter your password'
+                    : null,
+                suffixIcon: IconButton(
+                  tooltip: obscurePassword ? 'Show password' : 'Hide password',
+                  onPressed: onTogglePassword,
+                  icon: Icon(
+                    obscurePassword ? Icons.visibility_off : Icons.visibility,
                   ),
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 10,
-                        height: 10,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'SUBMIT',
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.4,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: false,
+                        onChanged: (_) {},
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        side: const BorderSide(color: Color(0xFF9B9B9B)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3),
                         ),
                       ),
+                      const Text(
+                        'Remember me',
+                        style:
+                            TextStyle(fontSize: 14, color: Color(0xFF777777)),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: const Text(
+                      'Forgot password?',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 9),
-            TextButton(
-              onPressed: () => context.push('/signup'),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                'Create Account',
-                style: TextStyle(
-                  fontSize: 6.5,
-                  color: Color(0xFF777777),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : () => onSubmit(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF05A0B5),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Sign in',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => context.push('/signup'),
+                child: const Text(
+                  'Create account',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF777777),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -346,6 +358,7 @@ class _UnderlineField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final Widget? suffixIcon;
 
   const _UnderlineField({
     required this.controller,
@@ -353,6 +366,7 @@ class _UnderlineField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.validator,
+    this.suffixIcon,
   });
 
   @override
@@ -361,29 +375,39 @@ class _UnderlineField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: const TextStyle(fontSize: 8, color: Color(0xFF444444)),
+      style: const TextStyle(fontSize: 16, color: Color(0xFF222222)),
       decoration: InputDecoration(
-        isDense: true,
         hintText: hintText,
         hintStyle: const TextStyle(
           color: Color(0xFFB4B4B4),
-          fontSize: 7.5,
-          letterSpacing: 0.5,
+          fontSize: 15,
         ),
-        contentPadding: const EdgeInsets.only(bottom: 7),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF9A9A9A), width: 0.7),
+        prefixIcon: Icon(
+          keyboardType == TextInputType.emailAddress
+              ? Icons.email_outlined
+              : Icons.lock_outline,
+          color: const Color(0xFF7A8A96),
         ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF077EB9), width: 1),
+        suffixIcon: suffixIcon,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFD3DCE3)),
         ),
-        errorBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.red, width: 0.7),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF077EB9), width: 1.5),
         ),
-        focusedErrorBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.red, width: 1),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red),
         ),
-        errorStyle: const TextStyle(fontSize: 7, height: 0.8),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        errorStyle: const TextStyle(fontSize: 12),
       ),
       validator: validator,
     );
@@ -391,6 +415,8 @@ class _UnderlineField extends StatelessWidget {
 }
 
 class _WelcomePainter extends CustomPainter {
+  const _WelcomePainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final rainPaint = Paint()

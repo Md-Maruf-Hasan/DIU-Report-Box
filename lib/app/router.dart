@@ -39,7 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/lost-found',
+    initialLocation: '/login',
     redirect: (context, state) {
       if (demoPreview) return null;
 
