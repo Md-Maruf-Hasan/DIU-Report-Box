@@ -98,6 +98,21 @@ class AuthRepository {
     return UserModel.fromFirestore(doc);
   }
 
+  Future<void> updateProfile({
+    required String name,
+    required String bio,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('You must be signed in to update your profile.');
+    }
+
+    await _firestore.collection('users').doc(user.uid).update({
+      'name': name.trim(),
+      'bio': bio.trim(),
+    });
+  }
+
   Stream<UserModel?> watchUserProfile(String uid) {
     return _firestore
         .collection('users')

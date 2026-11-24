@@ -55,6 +55,19 @@ class ResourceRepository {
     });
   }
 
+  Stream<List<ResourceModel>> watchMyResources() {
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('resources')
+        .where('uploaderUid', isEqualTo: user.uid)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => ResourceModel.fromFirestore(doc))
+            .toList());
+  }
+
   Future<void> uploadResource({
     required String subsection,
     required String title,

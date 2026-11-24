@@ -16,6 +16,7 @@ final _demoUser = UserModel(
   uid: 'demo-student',
   name: 'Demo Student',
   email: 'demo@diu.edu.bd',
+  bio: 'Software Engineering student at Daffodil International University.',
   departmentId: 'cse',
   studentId: '221-15-000',
   createdAt: DateTime(2026, 1, 1),
@@ -149,8 +150,8 @@ final _demoResources = [
       ResourceAttachment(
           kind: 'pdf', url: '', name: 'CSE221-midterm.pdf', sizeBytes: 1200000),
     ],
-    uploaderUid: 'student-5',
-    uploaderName: 'Tanvir Islam',
+    uploaderUid: _demoUser.uid,
+    uploaderName: _demoUser.name,
     createdAt: DateTime(2026, 10, 20),
   ),
   ResourceModel(
@@ -239,6 +240,11 @@ final List<Override> demoPreviewOverrides = [
         departmentId == 'cse' ? _demoRooms : const <RoomModel>[]);
   }),
   myReportsProvider.overrideWith((ref) => Stream.value(_demoReports)),
+  myResourcesProvider.overrideWith((ref) {
+    return Stream.value(_demoResources
+        .where((resource) => resource.uploaderUid == _demoUser.uid)
+        .toList());
+  }),
   reportNotesProvider.overrideWith((ref, reportId) {
     return Stream.value([
       const ReportNoteModel(

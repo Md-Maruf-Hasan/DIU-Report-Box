@@ -83,9 +83,12 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: _subsections.map((sub) => _ResourceListView(subsection: sub)).toList(),
+        children: _subsections
+            .map((sub) => _ResourceListView(subsection: sub))
+            .toList(),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'resources-upload',
         onPressed: AppConstants.demoPreview
             ? null
             : () {
@@ -114,12 +117,14 @@ class _ResourceListView extends ConsumerWidget {
           return const EmptyStateView(
             icon: Icons.folder_open_outlined,
             title: 'No materials uploaded yet',
-            subtitle: 'Upload past exam papers, lecture notes, or study materials to help your fellow students.',
+            subtitle:
+                'Upload past exam papers, lecture notes, or study materials to help your fellow students.',
           );
         }
 
         return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(resourcesBySubsectionProvider(subsection)),
+          onRefresh: () async =>
+              ref.invalidate(resourcesBySubsectionProvider(subsection)),
           child: ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: items.length,
@@ -135,7 +140,8 @@ class _ResourceListView extends ConsumerWidget {
                   ),
                   title: Text(
                     item.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,28 +150,35 @@ class _ResourceListView extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               item.courseCode,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 11),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(item.term, style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                          Text(item.term,
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey.shade700)),
                         ],
                       ),
                       const SizedBox(height: 2),
-                      Text(item.courseTitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      Text(item.courseTitle,
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600)),
                     ],
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: AppConstants.demoPreview
                       ? null
-                      : () => context.push('/resources/${item.id}', extra: item),
+                      : () =>
+                          context.push('/resources/${item.id}', extra: item),
                 ),
               );
             },
@@ -175,13 +188,15 @@ class _ResourceListView extends ConsumerWidget {
       loading: () => const LoadingSkeletonList(itemCount: 4),
       error: (e, _) => ErrorRetryView(
         message: e.toString(),
-        onRetry: () => ref.invalidate(resourcesBySubsectionProvider(subsection)),
+        onRetry: () =>
+            ref.invalidate(resourcesBySubsectionProvider(subsection)),
       ),
     );
   }
 
   IconData _getIcon(ResourceModel item) {
-    if (item.attachments.any((a) => a.kind == 'pdf')) return Icons.picture_as_pdf;
+    if (item.attachments.any((a) => a.kind == 'pdf'))
+      return Icons.picture_as_pdf;
     if (item.attachments.any((a) => a.kind == 'image')) return Icons.image;
     return Icons.link;
   }

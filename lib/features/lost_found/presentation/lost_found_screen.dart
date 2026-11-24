@@ -49,32 +49,36 @@ class LostFoundScreen extends ConsumerWidget {
                   context,
                   label: 'All Items',
                   isSelected: filters.typeFilter == 'all',
-                  onSelected: () => ref.read(lostFoundFilterProvider.notifier).state =
-                      filters.copyWith(typeFilter: 'all'),
+                  onSelected: () => ref
+                      .read(lostFoundFilterProvider.notifier)
+                      .state = filters.copyWith(typeFilter: 'all'),
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   context,
                   label: 'Lost',
                   isSelected: filters.typeFilter == 'lost',
-                  onSelected: () => ref.read(lostFoundFilterProvider.notifier).state =
-                      filters.copyWith(typeFilter: 'lost'),
+                  onSelected: () => ref
+                      .read(lostFoundFilterProvider.notifier)
+                      .state = filters.copyWith(typeFilter: 'lost'),
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   context,
                   label: 'Found',
                   isSelected: filters.typeFilter == 'found',
-                  onSelected: () => ref.read(lostFoundFilterProvider.notifier).state =
-                      filters.copyWith(typeFilter: 'found'),
+                  onSelected: () => ref
+                      .read(lostFoundFilterProvider.notifier)
+                      .state = filters.copyWith(typeFilter: 'found'),
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   context,
                   label: 'Resolved',
                   isSelected: filters.typeFilter == 'resolved',
-                  onSelected: () => ref.read(lostFoundFilterProvider.notifier).state =
-                      filters.copyWith(typeFilter: 'resolved'),
+                  onSelected: () => ref
+                      .read(lostFoundFilterProvider.notifier)
+                      .state = filters.copyWith(typeFilter: 'resolved'),
                 ),
               ],
             ),
@@ -129,7 +133,8 @@ class LostFoundScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                           onTap: AppConstants.demoPreview
                               ? null
-                              : () => context.push('/lost-found/${item.id}', extra: item),
+                              : () => context.push('/lost-found/${item.id}',
+                                  extra: item),
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Row(
@@ -144,7 +149,8 @@ class LostFoundScreen extends ConsumerWidget {
                                           width: 80,
                                           height: 80,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => _placeholderBox(),
+                                          errorBuilder: (_, __, ___) =>
+                                              _placeholderBox(),
                                         )
                                       : _placeholderBox(),
                                 ),
@@ -153,7 +159,8 @@ class LostFoundScreen extends ConsumerWidget {
                                 // Details
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
@@ -164,7 +171,8 @@ class LostFoundScreen extends ConsumerWidget {
                                               color: isLost
                                                   ? Colors.red.shade100
                                                   : Colors.green.shade100,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: Text(
                                               isLost ? 'LOST' : 'FOUND',
@@ -183,7 +191,8 @@ class LostFoundScreen extends ConsumerWidget {
                                                 horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: Colors.grey.shade200,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: Text(
                                               item.category,
@@ -197,8 +206,10 @@ class LostFoundScreen extends ConsumerWidget {
                                           if (item.isResolved)
                                             const Chip(
                                               label: Text('Resolved',
-                                                  style: TextStyle(fontSize: 10)),
-                                              visualDensity: VisualDensity.compact,
+                                                  style:
+                                                      TextStyle(fontSize: 10)),
+                                              visualDensity:
+                                                  VisualDensity.compact,
                                               backgroundColor: Colors.blueGrey,
                                             ),
                                         ],
@@ -217,7 +228,8 @@ class LostFoundScreen extends ConsumerWidget {
                                       Row(
                                         children: [
                                           Icon(Icons.location_on_outlined,
-                                              size: 14, color: Colors.grey.shade600),
+                                              size: 14,
+                                              color: Colors.grey.shade600),
                                           const SizedBox(width: 4),
                                           Expanded(
                                             child: Text(
@@ -234,7 +246,8 @@ class LostFoundScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        DateFormat('MMM dd, yyyy').format(item.date),
+                                        DateFormat('MMM dd, yyyy')
+                                            .format(item.date),
                                         style: TextStyle(
                                           color: Colors.grey.shade500,
                                           fontSize: 11,
@@ -262,8 +275,10 @@ class LostFoundScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed:
-            AppConstants.demoPreview ? null : () => context.push('/lost-found/create'),
+        heroTag: 'lost-found-create',
+        onPressed: AppConstants.demoPreview
+            ? null
+            : () => context.push('/lost-found/create'),
         icon: const Icon(Icons.add),
         label: const Text('Post Item'),
       ),
@@ -315,7 +330,8 @@ class LostFoundScreen extends ConsumerWidget {
               final isSel = filters.categoryFilter == cat;
               return ListTile(
                 title: Text(cat),
-                trailing: isSel ? const Icon(Icons.check, color: Colors.green) : null,
+                trailing:
+                    isSel ? const Icon(Icons.check, color: Colors.green) : null,
                 onTap: () {
                   ref.read(lostFoundFilterProvider.notifier).state =
                       filters.copyWith(categoryFilter: cat);

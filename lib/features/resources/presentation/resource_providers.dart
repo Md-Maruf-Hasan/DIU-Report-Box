@@ -45,6 +45,10 @@ final resourcesBySubsectionProvider =
       );
 });
 
+final myResourcesProvider = StreamProvider<List<ResourceModel>>((ref) {
+  return ref.watch(resourceRepositoryProvider).watchMyResources();
+});
+
 class ResourceController extends StateNotifier<AsyncValue<void>> {
   final ResourceRepository _repo;
 

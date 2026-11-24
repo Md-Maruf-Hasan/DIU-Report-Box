@@ -225,6 +225,7 @@ class QaFeedScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'qa-create',
         onPressed: AppConstants.demoPreview ? null : () => context.push('/qa/create'),
         icon: const Icon(Icons.edit_note),
         label: const Text('Ask / Post'),

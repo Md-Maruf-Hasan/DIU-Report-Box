@@ -50,5 +50,28 @@ void main() {
     await tester.tap(find.text('Q&A'));
     await tester.pumpAndSettle();
     expect(find.text('How do I register for a retake?'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('My Profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Demo Student'), findsOneWidget);
+    expect(
+      find.text(
+        'Software Engineering student at Daffodil International University.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Reports submitted'), findsOneWidget);
+    expect(find.text('Resources shared'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+
+    await tester.ensureVisible(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.dark,
+    );
   });
 }

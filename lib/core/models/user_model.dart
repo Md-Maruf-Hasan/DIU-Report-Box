@@ -4,6 +4,7 @@ class UserModel {
   final String uid;
   final String name;
   final String email;
+  final String bio;
   final String? studentId;
   final String departmentId;
   final String role; // 'student' | 'admin'
@@ -15,6 +16,7 @@ class UserModel {
     required this.uid,
     required this.name,
     required this.email,
+    this.bio = '',
     this.studentId,
     required this.departmentId,
     this.role = 'student',
@@ -31,6 +33,7 @@ class UserModel {
       uid: doc.id,
       name: data['name'] as String? ?? '',
       email: data['email'] as String? ?? '',
+      bio: data['bio'] as String? ?? '',
       studentId: data['studentId'] as String?,
       departmentId: data['departmentId'] as String? ?? '',
       role: data['role'] as String? ?? 'student',
@@ -44,6 +47,7 @@ class UserModel {
     return {
       'name': name,
       'email': email,
+      'bio': bio,
       'studentId': studentId,
       'departmentId': departmentId,
       'role': role,
@@ -56,6 +60,7 @@ class UserModel {
   UserModel copyWith({
     String? name,
     String? email,
+    String? bio,
     String? studentId,
     String? departmentId,
     String? role,
@@ -67,6 +72,7 @@ class UserModel {
       uid: uid,
       name: name ?? this.name,
       email: email ?? this.email,
+      bio: bio ?? this.bio,
       studentId: studentId ?? this.studentId,
       departmentId: departmentId ?? this.departmentId,
       role: role ?? this.role,
