@@ -135,8 +135,12 @@ class _ResourceListView extends ConsumerWidget {
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
                   leading: CircleAvatar(
-                    backgroundColor: Colors.teal.shade50,
-                    child: Icon(_getIcon(item), color: Colors.teal.shade800),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    child: Icon(
+                      _getIcon(item),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   title: Text(
                     item.title,

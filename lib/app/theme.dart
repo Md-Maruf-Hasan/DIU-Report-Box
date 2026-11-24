@@ -4,22 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
 class AppTheme {
-  static const Color primaryGreen = Color(0xFF006A4E);
-  static const Color primaryGreenDark = Color(0xFF004D38);
-  static const Color accentGold = Color(0xFFF2A900);
+  static const Color primaryBlue = Color(0xFF0783C4);
+  static const Color accentTeal = Color(0xFF05A0B5);
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryGreen,
-        primary: primaryGreen,
-        secondary: accentGold,
+        seedColor: primaryBlue,
+        primary: primaryBlue,
+        secondary: accentTeal,
         brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: false,
-        backgroundColor: primaryGreen,
+        backgroundColor: primaryBlue,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -38,7 +37,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryGreen,
+          backgroundColor: primaryBlue,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -53,7 +52,9 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryGreen,
+        seedColor: primaryBlue,
+        primary: primaryBlue,
+        secondary: accentTeal,
         brightness: Brightness.dark,
         surface: const Color(0xFF1E1E1E),
       ),
@@ -79,7 +80,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryGreen,
+          backgroundColor: primaryBlue,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),

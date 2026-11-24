@@ -96,7 +96,11 @@ class ResourceDetailScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               '${resource.courseCode} - ${resource.courseTitle}',
-              style: const TextStyle(fontSize: 16, color: Color(0xFF006A4E), fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 4),
             Text('Semester / Term: ${resource.term}', style: TextStyle(color: Colors.grey.shade700)),

@@ -55,7 +55,9 @@ class QaFeedScreen extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(Icons.schedule,
-                              color: filters.sortBy == 'newest' ? Colors.green : null),
+                              color: filters.sortBy == 'newest'
+                                  ? Theme.of(ctx).colorScheme.primary
+                                  : null),
                           const SizedBox(width: 8),
                           const Text('Newest'),
                         ],
@@ -66,7 +68,9 @@ class QaFeedScreen extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(Icons.whatshot,
-                              color: filters.sortBy == 'active' ? Colors.green : null),
+                              color: filters.sortBy == 'active'
+                                  ? Theme.of(ctx).colorScheme.primary
+                                  : null),
                           const SizedBox(width: 8),
                           const Text('Most Active'),
                         ],
