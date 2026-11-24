@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../../app/constants.dart';
 
 class SupabaseStorageService {
@@ -18,8 +19,11 @@ class SupabaseStorageService {
       );
     }
 
-    final fileName =
-        '${DateTime.now().microsecondsSinceEpoch}_${file.path.split(Platform.pathSeparator).last}';
+    final originalName = file.path.split(Platform.pathSeparator).last;
+    final extension = originalName.contains('.')
+        ? originalName.substring(originalName.lastIndexOf('.'))
+        : '';
+    final fileName = '${const Uuid().v4()}$extension';
     final objectPath = '$folder/$fileName';
     final bytes = await file.readAsBytes();
 

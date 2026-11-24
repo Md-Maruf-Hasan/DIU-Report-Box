@@ -22,11 +22,15 @@ export const validateEmailOnCreate = functions.auth.user().onCreate(async (user)
       console.error(`Failed to delete unauthorized user ${user.uid}:`, err);
     }
   } else {
-    // Ensure default role is 'student' if not set
-    const currentClaims = (await admin.auth().getUser(user.uid)).customClaims || {};
-    if (!currentClaims.role) {
-      await admin.auth().setCustomUserClaims(user.uid, { role: "student" });
-    }
+    const currentClaims =
+      (await admin.auth().getUser(user.uid)).customClaims || {};
+    const appRole =
+      currentClaims.appRole || (currentClaims.role === "admin" ? "admin" : "student");
+    await admin.auth().setCustomUserClaims(user.uid, {
+      ...currentClaims,
+      role: "authenticated",
+      appRole,
+    });
   }
 });
 
@@ -137,7 +141,7 @@ export const deleteAnonymousPost = functions.https.onCall(async (data, context) 
   if (!postId) throw new functions.https.HttpsError("invalid-argument", "postId required.");
 
   const authorDoc = await db.collection("postAuthors").doc(postId).get();
-  const isAdmin = context.auth.token.role === "admin";
+  const isAdmin = context.auth.token.appRole === "admin";
   const isOwner = authorDoc.exists && authorDoc.data()?.authorUid === context.auth.uid;
 
   if (!isAdmin && !isOwner) {
@@ -332,7 +336,7 @@ export const onReportCreated = functions.firestore
 // -----------------------------------------------------------------------------
 export const retryFailedSms = functions.https.onCall(async (data, context) => {
   // Allow admins or internal scheduled caller
-  if (context.auth && context.auth.token.role !== "admin") {
+  if (context.auth && context.auth.token.appRole !== "admin") {
     throw new functions.https.HttpsError("permission-denied", "Admin only.");
   }
 
@@ -479,7 +483,7 @@ export const onCommentCreated = functions.firestore
 // 8. Admin Role Assignment (Admin-only Callable)
 // -----------------------------------------------------------------------------
 export const setUserRole = functions.https.onCall(async (data, context) => {
-  if (!context.auth || context.auth.token.role !== "admin") {
+  if (!context.auth || context.auth.token.appRole !== "admin") {
     throw new functions.https.HttpsError(
       "permission-denied",
       "Only administrators can assign user roles."
@@ -491,7 +495,12 @@ export const setUserRole = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("invalid-argument", "Invalid targetUid or role.");
   }
 
-  await admin.auth().setCustomUserClaims(targetUid, { role });
+  const targetUser = await admin.auth().getUser(targetUid);
+  await admin.auth().setCustomUserClaims(targetUid, {
+    ...targetUser.customClaims,
+    role: "authenticated",
+    appRole: role,
+  });
   await db.collection("users").doc(targetUid).update({ role });
 
   return { success: true, targetUid, role };

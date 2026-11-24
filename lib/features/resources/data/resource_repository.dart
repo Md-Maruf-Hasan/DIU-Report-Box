@@ -98,7 +98,7 @@ class ResourceRepository {
       final contentType = kind == 'image' ? 'image/jpeg' : 'application/pdf';
       final url = await _storage.uploadFile(
         file: file,
-        folder: 'resources/$resourceId',
+        folder: '${user.uid}/resources/$resourceId',
         contentType: contentType,
       );
       final size = await file.length();

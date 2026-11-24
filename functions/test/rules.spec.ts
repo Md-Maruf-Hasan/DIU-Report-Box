@@ -56,14 +56,16 @@ describe("DIU Report Box - Firestore Security Rules Unit Tests", () => {
 
     const studentBContext = testEnv.authenticatedContext("student_b", {
       email_verified: true,
-      role: "student",
+      role: "authenticated",
+      appRole: "student",
     });
     const studentB = studentBContext.firestore();
     await assertFails(studentB.collection("reports").doc("rep1").get());
 
     const studentAContext = testEnv.authenticatedContext("student_a", {
       email_verified: true,
-      role: "student",
+      role: "authenticated",
+      appRole: "student",
     });
     const studentA = studentAContext.firestore();
     await assertSucceeds(studentA.collection("reports").doc("rep1").get());
@@ -87,7 +89,8 @@ describe("DIU Report Box - Firestore Security Rules Unit Tests", () => {
 
     const studentContext = testEnv.authenticatedContext("student_a", {
       email_verified: true,
-      role: "student",
+      role: "authenticated",
+      appRole: "student",
     });
     const studentDb = studentContext.firestore();
     await assertFails(
@@ -101,7 +104,8 @@ describe("DIU Report Box - Firestore Security Rules Unit Tests", () => {
 
     const adminContext = testEnv.authenticatedContext("admin_user", {
       email_verified: true,
-      role: "admin",
+      role: "authenticated",
+      appRole: "admin",
     });
     const adminDb = adminContext.firestore();
     await assertSucceeds(
@@ -126,14 +130,16 @@ describe("DIU Report Box - Firestore Security Rules Unit Tests", () => {
 
     const studentContext = testEnv.authenticatedContext("student_a", {
       email_verified: true,
-      role: "student",
+      role: "authenticated",
+      appRole: "student",
     });
     const studentDb = studentContext.firestore();
     await assertFails(studentDb.collection("postAuthors").doc("anon_post_1").get());
 
     const adminContext = testEnv.authenticatedContext("admin_user", {
       email_verified: true,
-      role: "admin",
+      role: "authenticated",
+      appRole: "admin",
     });
     const adminDb = adminContext.firestore();
     await assertSucceeds(adminDb.collection("postAuthors").doc("anon_post_1").get());

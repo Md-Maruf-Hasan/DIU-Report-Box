@@ -17,7 +17,11 @@ if (!email) {
 async function setRole() {
   try {
     const user = await admin.auth().getUserByEmail(email);
-    await admin.auth().setCustomUserClaims(user.uid, { role });
+    await admin.auth().setCustomUserClaims(user.uid, {
+      ...user.customClaims,
+      role: "authenticated",
+      appRole: role,
+    });
     await admin.firestore().collection("users").doc(user.uid).set(
       { role },
       { merge: true }

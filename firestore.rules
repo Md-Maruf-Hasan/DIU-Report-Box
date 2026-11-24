@@ -13,7 +13,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isEmailVerified() && request.auth.token.role == 'admin';
+      return isEmailVerified() && request.auth.token.appRole == 'admin';
     }
 
     function isOwner(userId) {

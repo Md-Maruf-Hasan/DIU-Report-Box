@@ -61,12 +61,15 @@ DIU Report Box is a mobile application for university students at Daffodil Inter
 
 ### 3. Configure Supabase Storage
 1. Create a Supabase project.
-2. Create a public storage bucket named `app-files`.
-3. Run the app with the following defines:
+2. Create a **public** storage bucket named `app-files`. Public access is used for reading uploaded attachments; uploads remain restricted by Storage RLS.
+3. In **Authentication → Third-party Auth**, add the Firebase project used by this app.
+4. Run `supabase/storage_policies.sql` in the Supabase SQL Editor. The policy restricts signed-in Firebase users to their own folders. Q&A image paths omit the UID to preserve anonymous posts.
+5. Run the app with the Supabase project URL and publishable (anon) key:
    ```bash
    flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co --dart-define=SUPABASE_ANON_KEY=<anon-key>
    ```
-4. Uploaded files use `lostFound/{postId}`, `qa/{postId}`, `reports/{reportId}`, and `resources/{resourceId}` paths.
+   Never put a Supabase `service_role` key in the Flutter app.
+6. Files are stored under `{firebaseUid}/lostFound/{postId}`, `qa/{uploadId}` (anonymous-safe), `{firebaseUid}/reports/{uploadId}`, and `{firebaseUid}/resources/{resourceId}`.
 
 ### 4. Running Firebase Local Emulators
 To test Firebase services locally (Firestore, Auth, Functions):
@@ -81,6 +84,16 @@ cd functions
 npm install
 npm run build
 ```
+Deploy the updated functions before using Supabase Storage so new accounts receive the required `role: authenticated` claim:
+```bash
+npm run deploy
+```
+For existing accounts, migrate their Firebase claims once:
+```bash
+node scripts/migrate_supabase_auth_claims.js
+```
+Firebase's application role (`student` or `admin`) is stored separately in the `appRole` claim.
+After migration, users should sign out and sign back in to refresh their Firebase ID tokens.
 
 ### 6. Run Security Rules Unit Tests
 ```bash
@@ -132,6 +145,7 @@ lib/
     profile/      # User settings & my posts
     admin/        # Moderation, maintenance contacts, SMS retry
 functions/        # TypeScript Cloud Functions
+supabase/         # Storage upload RLS policies
 firestore.rules   # Security rules
 DECISIONS.md      # Architecture log
 ```

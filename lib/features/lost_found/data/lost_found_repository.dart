@@ -80,7 +80,7 @@ class LostFoundRepository {
       final file = imageFiles[i];
       final url = await _storage.uploadFile(
         file: file,
-        folder: 'lostFound/$postId',
+        folder: '${user.uid}/lostFound/$postId',
         contentType: 'image/jpeg',
       );
       imageUrls.add(url);

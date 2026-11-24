@@ -42,11 +42,11 @@ This document records architectural, technical, and implementation decisions mad
 
 ## 5. Security Rules & Role Management
 - **Decision**:
-  - Roles (`student`, `admin`) are stored as Firebase Auth Custom Claims (`request.auth.token.role`).
+  - Firebase Auth's `role` custom claim is `authenticated` for Supabase Storage access. The app role (`student`, `admin`) is stored separately as `appRole`.
   - Firestore Security Rules enforce:
     1. `request.auth != null && request.auth.token.email_verified == true` for all app access.
-    2. Admin role check: `request.auth.token.role == 'admin'`.
-    3. Private reports: `resource.data.reporterUid == request.auth.uid || request.auth.token.role == 'admin'`.
+    2. Admin role check: `request.auth.token.appRole == 'admin'`.
+    3. Private reports: `resource.data.reporterUid == request.auth.uid || request.auth.token.appRole == 'admin'`.
     4. Maintenance contacts: only `admin` can read/write.
     5. Anonymous author collections: only `admin` can read; no direct client writes.
 
@@ -56,7 +56,11 @@ This document records architectural, technical, and implementation decisions mad
 - **Decision**:
   - Config flag `RESOURCE_REQUIRES_APPROVAL` defaults to `false` (immediate availability) but can be set to `true` to require admin approval before appearing in public queries.
   - Supabase Storage path convention:
-    - `resources/{resourceId}/{fileName}`
+    - `{firebaseUid}/lostFound/{postId}/{fileName}`
+    - `qa/{uploadId}/{fileName}` (UID omitted to preserve anonymous posts)
+    - `{firebaseUid}/reports/{uploadId}/{fileName}`
+    - `{firebaseUid}/resources/{resourceId}/{fileName}`
+  - Firebase ID tokens authenticate Supabase Storage requests; Storage RLS permits uploads only inside the caller's UID folder.
     - Size limits: Image <= 5 MB, PDF <= 10 MB.
   - Mime types and file extensions are validated before upload.
 

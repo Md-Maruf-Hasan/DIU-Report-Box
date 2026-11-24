@@ -64,10 +64,12 @@ class AuthRepository {
     required String password,
   }) async {
     final cleanEmail = email.trim().toLowerCase();
-    return await _auth.signInWithEmailAndPassword(
+    final credential = await _auth.signInWithEmailAndPassword(
       email: cleanEmail,
       password: password,
     );
+    await credential.user?.getIdToken(true);
+    return credential;
   }
 
   Future<void> sendEmailVerification() async {
@@ -81,7 +83,10 @@ class AuthRepository {
     final user = _auth.currentUser;
     if (user == null) return false;
     await user.reload();
-    return _auth.currentUser?.emailVerified ?? false;
+    final reloadedUser = _auth.currentUser;
+    final isVerified = reloadedUser?.emailVerified ?? false;
+    if (isVerified) await reloadedUser?.getIdToken(true);
+    return isVerified;
   }
 
   Future<void> sendPasswordResetEmail(String email) async {

@@ -104,7 +104,7 @@ class ReportRepository {
       final file = imageFiles[i];
       final url = await _storage.uploadFile(
         file: file,
-        folder: 'reports/$tempReportId',
+        folder: '${user.uid}/reports/$tempReportId',
         contentType: 'image/jpeg',
       );
       imageUrls.add(url);

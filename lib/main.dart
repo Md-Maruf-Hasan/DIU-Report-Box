@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,22 +25,31 @@ void main() async {
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
       await FcmService.initialize();
-
-      if (AppConstants.supabaseUrl.isNotEmpty &&
-          AppConstants.supabaseAnonKey.isNotEmpty) {
-        await Supabase.initialize(
-          url: AppConstants.supabaseUrl,
-          anonKey: AppConstants.supabaseAnonKey,
-        );
-      } else {
-        debugPrint(
-          '[Supabase] URL or anon key is missing; file uploads will be unavailable.',
-        );
-      }
     } catch (e) {
       debugPrint('[Firebase] Initialization failed: $e');
       debugPrint('[Firebase] Falling back to demo preview mode.');
       _firebaseInitFailed = true;
+    }
+
+    if (!_firebaseInitFailed &&
+        AppConstants.supabaseUrl.isNotEmpty &&
+        AppConstants.supabaseAnonKey.isNotEmpty) {
+      try {
+        await Supabase.initialize(
+          url: AppConstants.supabaseUrl,
+          publishableKey: AppConstants.supabaseAnonKey,
+          accessToken: () async {
+            final user = FirebaseAuth.instance.currentUser;
+            return await user?.getIdToken();
+          },
+        );
+      } catch (e) {
+        debugPrint('[Supabase] Initialization failed; uploads are unavailable: $e');
+      }
+    } else if (!_firebaseInitFailed) {
+      debugPrint(
+        '[Supabase] URL or publishable key is missing; file uploads will be unavailable.',
+      );
     }
   }
 
